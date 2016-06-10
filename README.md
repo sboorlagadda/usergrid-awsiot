@@ -6,14 +6,13 @@ Integrating Usergrid with AWS IoT to provide a multi-tenant BaaS (for consumptio
 
 1. AP abstract cloud and behaves as a gateway between device & cloud
 1. AP and Devices communicate using a magical interface that is exposed and is out-of-scope.
-1. All APs are mapped to Usergrid`s Organization using a single device certificate. So in AWS, things are just Access Points.
+1. APs are mapped to Usergrid`s Organization using a single device certificate. So in AWS, things are just Access Points.
 1. Each AP is a device in AWS IoT and uses a device certificate which is mapped to Usergrid`s Organization
 1. Multiple APs share the same device certificate resource identifying the Org.
 1. Multiple tenant`s device data/request flows through AP and to Cloud
-1. Assuming device -> tenant relationship is available through deviceserial# -> Usergrid`s application id.
+1. Assuming device -> tenant relationship is available through deviceserial# -> Usergrid`s application id mapping in some backend service.
 
-A completely isolated tenent deployment, where APs are operated by tenant itself is also possible with a dedicated organization in Usergrid.
-And a dedicated device certificate mapping all his APs to his org and we can provide a way to map his device serial numbers to app inside his org. 
+A completely isolated tenent deployment, where APs are operated by tenant itself is also possible with a dedicated organization in Usergrid. And a dedicated device certificate mapping all his APs to his org. Provide a way to map his device serial numbers to his apps inside his org. 
 
 #### Mappings
 Actor|Usergrid|AWS IoT
@@ -44,6 +43,8 @@ which is **deviceregistration/request/ID**, ID is the same unique ID already use
 AWS IoT Rule matches this request topic since it is created with wildcard topic filter and invokes the target `Deviceregistration` function.
 When the Lambda function completes the HTTP request on Usergrid it will publish the response on **/deviceregistration/response/ID**, where ID is extracted from the request topic. Lambda use unique ID as its client ID while connecting and publishing to AWS IoT mqtt broker.
 As only one AP has subscribed to the response topic, it receives the response and is forward it to the respective device. AP unsubscribes to the response topic, as it is unique and to avoid to session limitations.
+
+An example device registration request-response implementation can be found [here](requestresponse/README.md)
 
 #### Telemetry
 -WIP-
