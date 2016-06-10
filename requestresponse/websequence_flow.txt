@@ -1,0 +1,33 @@
+title Usergrid + AWS IoT (Request-Response)
+
+Device->+AP: RegisterDevice(serial#, deviceDetails)
+note over Device, AP:
+Interace between device & AP are out-of-scope 
+and a magical interface is assumed.
+end note
+AP->AP: Generate a unique request Id (Say REQ123).
+AP->AWS IoT Device: Subscribe to deviceregistration/response/REQ123
+AP->-Device: Return RequestID(REQ123)
+AP->+AWS IoT Device: Publish deviceDetails to deviceregistration/request/REQ123
+AWS IoT Device->AWS IoT Device: AWS IoT Rule with topic filter deviceregistration/request/+
+AWS IoT Device->+AWS Lambda: Invoke DeviceRegistration Function
+note right of AWS IoT Device:
+AWS Rule matches the published topic 
+deviceregistration/request/REQ123
+with
+deviceregistration/request/+
+and invokes the target Lambda function
+end note
+note right of AWS Lambda:
+orgId is available as device attribute
+device is mapped to an appId(tenant) using serialnumber<->appId
+end note
+AWS Lambda->+Usergrid: HTTP POST /orgs/{orgid}/apps/{appid}/devices
+Usergrid->-AWS Lambda: HTTP 201 Created, {"deviceid":"UUID"}
+AWS Lambda->-AWS IoT Device: Publish response to deviceregistration/response/REQ123
+note left of AWS Lambda:
+Lambda becomes an mqtt client and publishes to AWS IoT
+It uses the source AP certificate.
+end note
+AWS IoT Device->AP: Publishes out the response
+AP->Device:Forward the response to the device

@@ -1,0 +1,9 @@
+{
+  "name": "DeviceRegistration",
+  "version": "0.0.1",
+  "description": "Register a device in usergrid and publish the response to MQTT",
+  "main": "index.js",
+  "dependencies": {
+  	"aws-iot-device-sdk": "^1.0.12"
+  }
+}
