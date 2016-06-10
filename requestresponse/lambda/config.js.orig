@@ -1,0 +1,30 @@
+var config = {}
+
+config.host = "HOST.iot.us-east-1.amazonaws.com";
+
+config.deviceCertificate = new Buffer("-----BEGIN CERTIFICATE-----\n"+
+"MIIDWjCCAkKgAwIBAgIVAIIe1tPPuSDqKDouTCIco9qqxl9vMA0GCSqGSIb3DQEB\n"+
+"JFwwv7xNJODhw4EPLydpXIiHGqNMxPGueh8l2A6pBdu3D8BW1185QldxjRkFuQ==\n"+
+"-----END CERTIFICATE-----\n");
+
+config.devicePrivateKey = new Buffer("-----BEGIN RSA PRIVATE KEY-----\n"+
+"MIIEpAIBAAKCAQEAtb8APDB0Gj5DhfIznOklVQqaNo9XVAlYb5XAHmosjAGDGblt\n"+
+"0jM3Rds/hrsb3RYFoK2pThfpKILSxR5DSN+/QHb9jdEhu7YmUDj1Rw==\n"+
+"-----END RSA PRIVATE KEY-----\n");
+
+config.lambdaCertificate = new Buffer("-----BEGIN CERTIFICATE-----\n"+
+"MIIDWTCCAkGgAwIBAgIUFCz4E6F7xGppaYjCWGRo8XLEuDAwDQYJKoZIhvcNAQEL\n"+
+
+config.lambdaPrivateKey = new Buffer("-----BEGIN RSA PRIVATE KEY-----\n"+
+"MIIEowIBAAKCAQEAnhppjqgxeLrC31FwR5dPf5cCKGarw7lanVYIhXuqML3JgxGC\n"+
+"YjsLCCfvQp68mX2dYqF4YSf/v/XCxEDCnna2Q+5sEbHclPsk33z8\n"+
+"-----END RSA PRIVATE KEY-----\n");
+/**
+ * Standard Verisign rootCA for everyone to use
+ */
+config.rootCA = new Buffer("-----BEGIN CERTIFICATE-----\n"+
+"MIIE0zCCA7ugAwIBAgIQGNrRniZ96LtKIVjNzGs7SjANBgkqhkiG9w0BAQUFADCB\n"+
+"hnacRHr2lVz2XTIIM6RUthg/aFzyQkqFOFSDX9HoLPKsEdao7WNq\n"+
+"-----END CERTIFICATE-----");
+
+module.exports = config;
