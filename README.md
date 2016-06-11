@@ -27,7 +27,7 @@ Telemetry(Temperature)|/orgs/{orgid}/apps/{appid}/sensors/{sensorid}/temperature
 
 At the ingestion end, sensors need three basic flows:
 
-1. Classic [request-response](#request-response paradigm) round-trip. Eg: Device registration
+1. Classic [request-response](#request-response-paradigm) round-trip. Eg: Device registration
 1. Sensors publish [telemetry](#telemetry) data, a fire-and-forget way. Eg: Telemetry
 1. Sensors interested in [events](#events), device-device or cloud-device notifications. Eg: OTA Update, Restart etc
 
