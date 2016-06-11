@@ -2,17 +2,26 @@
 
 Integrating Usergrid with AWS IoT to provide a multi-tenant BaaS (for consumption) with AWS IoT(for ingestion)
 
+In a typical IoT deployment, sensors (devices) connected to cloud through an access-point(AP). 
+A standard solution is to build a mqtt-bridge, where a mqtt broker running on AP bridges to cloud mqtt broker providing a pub/sub paradigm to its connected devices.
+
+An alternative approach is to abstract the cloud interface and leave the device<->AP interface independent of cloud interface. This project aims at presenting this approach.
+
+Usergrid provides collections & entities as logical entities.
+Senors are entities in a device collection and each sensor can have telemetry data.
+
+At the consumption end, Usergrid provides several query capabilities and user managment to allow tenants to build a web or mobile application and allowing tenants to completely control data-access through roles, permissions. (Refer [Usergrid documentation](http://usergrid.apache.org/docs/security-and-auth/using-permissions.html) for more info on ACLs.)
+
 ###Scene
 
 1. AP abstract cloud and behaves as a gateway between device & cloud
-1. AP and Devices communicate using a magical interface that is exposed and is out-of-scope.
-1. APs are mapped to Usergrid`s Organization using a single device certificate. So in AWS, things are just Access Points.
-1. Each AP is a device in AWS IoT and uses a device certificate which is mapped to Usergrid`s Organization
-1. Multiple APs share the same device certificate resource identifying the Org.
-1. Multiple tenant`s device data/request flows through AP and to Cloud
-1. Assuming device -> tenant relationship is available through deviceserial# -> Usergrid`s application id mapping in some backend service.
+1. AP and Devices communicate using a magical interface that is exposed by AP and is out-of-scope of this project.
+1. APs belong to a particular tenant is mapped to Usergrid`s Organization using a device certificate. So in AWS, things are just Access Points.
+1. Each AP is a device in AWS IoT and can share a single device certificate that is mapped to orgId. This is easier to manage AP<->Tenant mapping. Rotating device certificate can be inefficient as all APs have to be updated if using a single certificate, but can be enhanced to use unique certificate to each AP and map several certificates to OrgId.
+1. Multiple device data/request flows through AP and to Cloud.
+1. Devices can be mapped to applications under an Usergrid`s Org. Allowing a tenant to seggregate a particular sensor data to one application. Eg: If a smart-home has several sensors (thermostat, humidity), thermostat data can be stored under one app or vice-versa.
 
-A completely isolated tenent deployment, where APs are operated by tenant itself is also possible with a dedicated organization in Usergrid. And a dedicated device certificate mapping all his APs to his org. Provide a way to map his device serial numbers to his apps inside his org. 
+A completely different deployment scenario is possible, if a particular vendor operates AP allowing multiple tenent`s devices talk to AP. In this case AP is mapped to Org(Vendor) and device is mapped to tenant(1 app per tenant under org). 
 
 #### Mappings
 Actor|Usergrid|AWS IoT
