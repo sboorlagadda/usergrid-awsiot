@@ -5,11 +5,11 @@ Integrating Usergrid with AWS IoT to provide a multi-tenant BaaS (for consumptio
 In a typical IoT deployment, sensors (devices) connected to cloud through an access-point(AP). 
 A standard solution is to build a mqtt-bridge, where a mqtt broker running on AP bridges to cloud mqtt broker providing a pub/sub paradigm to its connected devices.
 
-An alternative approach is to abstract the cloud interface and leave the device<->AP interface independent of cloud interface. This project aims at presenting this approach, by wrapping Usergrid collection/entities HTTP APIs inside MQTT pub/sub. As AP abstracts the cloud interface for all the sensors that connects, we can consider that AWS Things are just access-points and  create sensors as a `collection` with each sensor as an `entity` in Usergrid.
+An alternative approach is to abstract the cloud interface and leave the device<->AP interface independent of cloud interface. This project aims at presenting this approach where sensors and telemetry data is stored as Usergrid collections and entities, by wrapping Usergrid collection/entities HTTP APIs with MQTT pub/sub. As AP abstracts the cloud interface for all the sensors that connects, consider that AWS Things are just access-points.
 
 Usergrid provides collections & entities as storage space. Collections are used to denote group of entities.
 Eg: Users is a collection & User is an entity in users collections
-Similarly devices are entities in a device collection and each device can have telemetry data.
+Similarly sensors are entities in a sensor collection and each sensor can have telemetry data.
 
 Collection|URI
 ---|---
@@ -25,11 +25,15 @@ Sensor|/orgs/{orgid}/apps/{appid}/sensors/{sensorid}
 Devices(User Mobiles)|/orgs/{orgid}/apps/{appid}/users/{userid}/devices/{deviceId}
 Telemetry(Temperature)|/orgs/{orgid}/apps/{appid}/sensors/{sensorid}/temperatures/{timestamp}
 
-When an organization is created in Usergrid, an AWS IoT device certificate & policy can be created. When ever an AP is provisioned, an AWS IoT device is created and associated with the organization. 
+When an organization is created in Usergrid, an AWS IoT device certificate & policy can be created and associated with orgid from usergrid. When ever an AP is provisioned, an AWS IoT device can be created, so both AP and its corresponding AWS IoT Device are `Org Aware`. To simplify, APs that belong to a particular org can use one device certificate (expect that provisioning a new device certificate needs an update to all access-points).
 
-When a message is published the respective `{orgid}` can be retrieved from `device attributes` available from the AWS Device Registry, where as the `{appid}` & `{sensorid}` can be part of the topic, and use AWS Rule SQL to extract the sensorid.
+Sensors can be registered into an `{org}` using Usergrid HTTP API. Registering a sensor can help a sensor to auto-discover its org details and other details during its initialization by using serial# or mac-address etc.
 
-Eg: For the topic `/deviceregistration/{appid}/{sensorid}`, appId & sensorId can be retrieved using AWS SQL `select * as Payload, topic(2) as appId, topic(3) as sensorId from /deviceregistration/+/+ `.
+Eg: Device can publish a message to fetch its profile on `/device/profile` topic. See [request-response flow](#request-response-paradigm) below 
+
+When a message is published by a device through an AP, the respective `{orgid}` can be retrieved from `device attributes` available on the AP (AWS Device Registry), `{appid}` & `{sensorid}` from the topic by using `AWS Rule SQL`, and trigger a lambda function which can save the message into respective Usergrid storage space `/org/{orgid}/apps/{appid}/sensors/{sensorid}/status`
+
+Eg: For the topic `/device/{appid}/{sensorid}/status`, appId & sensorId can be retrieved using AWS SQL `select * as Payload, topic(2) as appId, topic(3) as sensorId from /device/+/+/status`.
 
 At the ingestion end, sensors need three basic flows:
 
@@ -37,7 +41,7 @@ At the ingestion end, sensors need three basic flows:
 1. Sensors publish [telemetry](#telemetry) data, a fire-and-forget way. Eg: Telemetry
 1. Sensors interested in [events](#events), device-device or cloud-device notifications. Eg: OTA Update, Restart etc
 
-At the consumption end, Usergrid provides several query capabilities and user management APIs to allow tenants to build a web or mobile application and allowing tenants to completely control data-access through roles, permissions at application level. (Refer [Usergrid documentation](http://usergrid.apache.org/docs/security-and-auth/using-permissions.html) for more info on ACLs.)
+At the consumption end, Usergrid provides several query operations and user management APIs to allow tenants to build a web or mobile application and allowing tenants to completely control data-access through roles, permissions at application level. (Refer [Usergrid documentation](http://usergrid.apache.org/docs/security-and-auth/using-permissions.html) for more info on ACLs.)
 
 ###Scenarios
 
