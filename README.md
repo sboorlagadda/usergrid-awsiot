@@ -5,7 +5,7 @@ Integrating Usergrid with AWS IoT to provide a multi-tenant BaaS (for consumptio
 In a typical IoT deployment, sensors (devices) connected to cloud through an access-point(AP). 
 A standard solution is to build a mqtt-bridge, where a mqtt broker running on AP bridges to cloud mqtt broker providing a pub/sub paradigm to its connected devices.
 
-An alternative approach is to abstract the cloud interface and leave the device<->AP interface independent of cloud interface. This project aims at presenting this approach, by wrapping Usergrid collection/entities HTTP APIs inside MQTT pub/sub.
+An alternative approach is to abstract the cloud interface and leave the device<->AP interface independent of cloud interface. This project aims at presenting this approach, by wrapping Usergrid collection/entities HTTP APIs inside MQTT pub/sub. As AP abstracts the cloud interface for all the sensors that connects, we can consider that AWS Things are just access-points and  create sensors as a `collection` with each sensor as an `entity` in Usergrid.
 
 Usergrid provides collections & entities as storage space. Collections are used to denote group of entities.
 Eg: Users is a collection & User is an entity in users collections
@@ -24,6 +24,12 @@ User|/orgs/{orgid}/apps/{appid}/users/{userid}
 Sensor|/orgs/{orgid}/apps/{appid}/sensors/{sensorid}
 Devices(User Mobiles)|/orgs/{orgid}/apps/{appid}/users/{userid}/devices/{deviceId}
 Telemetry(Temperature)|/orgs/{orgid}/apps/{appid}/sensors/{sensorid}/temperatures/{timestamp}
+
+When an organization is created in Usergrid, an AWS IoT device certificate & policy can be created. When ever an AP is provisioned, an AWS IoT device is created and associated with the organization. 
+
+When a message is published the respective `{orgid}` can be retrieved from `device attributes` available from the AWS Device Registry, where as the `{appid}` & `{sensorid}` can be part of the topic, and use AWS Rule SQL to extract the sensorid.
+
+Eg: For the topic `/deviceregistration/{appid}/{sensorid}`, appId & sensorId can be retrieved using AWS SQL `select * as Payload, topic(2) as appId, topic(3) as sensorId from /deviceregistration/+/+ `.
 
 At the ingestion end, sensors need three basic flows:
 
